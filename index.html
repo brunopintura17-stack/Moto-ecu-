@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MotoECU Pro | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700&display=swap');
+        
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            background-color: #000;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .speed-font {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32vh;
+            font-weight: 900;
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+            font-style: italic;
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .label-style {
+            font-size: 10px;
+            font-weight: 800;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .primary-btn {
+            background: #1d4ed8;
+            padding: 20px 40px;
+            border-radius: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 30px rgba(29, 78, 216, 0.3);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-full overflow-hidden">
+
+    <!-- PANTALLA DE CONEXIÓN -->
+    <div id="setup-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8 text-center">
+        <div class="mb-12">
+            <h1 class="font-orbitron text-3xl italic font-black text-white uppercase tracking-tighter">MOTOECU <span class="text-blue-600">PRO</span></h1>
+            <p class="text-[8px] tracking-[0.5em] text-zinc-600 mt-2 uppercase">Deep Scan Web Engine</p>
+        </div>
+
+        <button onclick="conectarOBD()" class="primary-btn flex items-center gap-4 active:scale-95 transition-transform">
+            <i data-lucide="bluetooth"></i>
+            Conectar OBD2
+        </button>
+        
+        <p id="status" class="mt-8 text-[10px] font-mono text-zinc-700 uppercase tracking-widest">Esperando adaptador...</p>
+        
+        <button onclick="iniciarDemo()" class="mt-12 text-[10px] text-zinc-800 underline uppercase tracking-widest font-bold">Modo Simulación</button>
+    </div>
+
+    <!-- DASHBOARD PRINCIPAL -->
+    <div id="dash" class="hidden flex-1 flex flex-col p-6 pt-12 bg-black">
+        
+        <!-- Header con KM/H -->
+        <div class="flex justify-between items-start mb-4">
+            <span class="text-blue-500 font-bold text-[10px] tracking-widest">KM/H</span>
+            <div class="flex items-center gap-2">
+                <span id="conn-dot" class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,1)]"></span>
+                <span class="text-[8px] font-bold text-zinc-500 uppercase">Live Data</span>
+            </div>
+        </div>
+
+        <!-- Velocímetro Gigante -->
+        <div class="flex-1 flex flex-col items-center justify-center">
+            <div class="speed-font" id="val-speed">00</div>
+            
+            <div class="flex gap-4 mt-6">
+                <div class="glass-panel px-4 py-1 flex items-center gap-2">
+                    <span class="label-style">Gear:</span>
+                    <span class="text-blue-500 font-black" id="val-gear">N</span>
+                </div>
+                <div class="glass-panel px-4 py-1 flex items-center gap-2">
+                    <span class="label-style">TPS:</span>
+                    <span class="text-green-500 font-black" id="val-tps">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sensores Inferiores -->
+        <div class="grid grid-cols-3 gap-2 mt-auto mb-4">
+            <div class="glass-panel p-4 flex flex-col items-center justify-center">
+                <span class="label-style mb-1">Temp</span>
+                <span class="text-orange-600 font-bold text-lg" id="val-temp">--</span>
+            </div>
+            <div class="glass-panel p-4 flex flex-col items-center justify-center">
+                <span class="label-style mb-1 text-blue-500 font-black">AFR</span>
+                <span class="text-blue-400 font-bold text-lg" id="val-afr">--</span>
+            </div>
+            <div class="glass-panel p-4 flex flex-col items-center justify-center">
+                <span class="label-style mb-1 text-white">RPM</span>
+                <span class="text-white font-bold text-lg" id="val-rpm">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const statusEl = document.getElementById('status');
+
+        async function conectarOBD() {
+            statusEl.innerText = "Buscando adaptador...";
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
+                });
+                
+                statusEl.innerText = "Conectado. Sincronizando...";
+                await device.gatt.connect();
+                lanzarDashboard();
+            } catch (err) {
+                statusEl.innerText = "Error: " + err.message;
+                statusEl.className = "mt-8 text-[10px] font-mono text-red-500 uppercase";
+            }
+        }
+
+        function iniciarDemo() {
+            document.getElementById('conn-dot').classList.replace('bg-blue-500', 'bg-orange-500');
+            lanzarDashboard();
+        }
+
+        function lanzarDashboard() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('dash').classList.remove('hidden');
+            
+            // Simulación de datos para ver el diseño funcionando
+            setInterval(() => {
+                const rpm = Math.floor(1000 + Math.random() * 8500);
+                const speed = Math.floor(rpm / 95);
+                document.getElementById('val-rpm').innerText = rpm;
+                document.getElementById('val-speed').innerText = speed.toString().padStart(2, '0');
+                document.getElementById('val-tps').innerText = Math.floor((rpm/9000)*100) + "%";
+                document.getElementById('val-temp').innerText = (80 + Math.floor(Math.random()*10)) + "°C";
+                document.getElementById('val-afr').innerText = "14.7";
+                
+                let gear = "N";
+                if(speed > 5) gear = "1";
+                if(speed > 35) gear = "2";
+                if(speed > 70) gear = "3";
+                document.getElementById('val-gear').innerText = gear;
+            }, 100);
+        }
+    </script>
+</body>
+</html>
