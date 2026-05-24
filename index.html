@@ -2,167 +2,595 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MotoECU Pro | Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoECU Pro</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700&display=swap');
-        
-        body, html {
-            margin: 0; padding: 0;
-            height: 100%; width: 100%;
-            background-color: #000;
-            color: white;
-            font-family: 'Inter', sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            width: 100%;
+            height: 100vh;
             overflow: hidden;
         }
 
-        .speed-font {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 32vh;
-            font-weight: 900;
-            line-height: 0.8;
-            letter-spacing: -0.05em;
-            font-style: italic;
+        .container {
+            width: 100%;
+            height: calc(100vh - 70px);
+            position: relative;
         }
 
-        .glass-panel {
-            background: rgba(20, 20, 22, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease-in-out;
         }
 
-        .label-style {
-            font-size: 10px;
-            font-weight: 800;
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #3b82f6;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-success {
+            background: #16a34a;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .device-list {
+            margin: 20px 0;
+        }
+
+        .device-item {
+            background: #0a0a0a;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .device-item:hover {
+            background: #1a1a1a;
+            transform: scale(1.02);
+        }
+
+        .device-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .device-info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .status {
+            background: #0a0a0a;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .status.success {
+            border-color: #16a34a;
+            color: #16a34a;
+        }
+
+        .status.error {
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .status.loading {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .speed-display {
+            text-align: center;
+            font-size: 100px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .data-box {
+            background: #0a0a0a;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .data-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .data-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-top: 8px;
+        }
+
+        .console {
+            background: #050505;
+            border: 1px solid #0f0;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #0f0;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        .console-line {
+            margin: 3px 0;
+        }
+
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: #000;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: none;
             color: #666;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            transition: color 0.2s;
+            border-top: 3px solid transparent;
         }
 
-        .primary-btn {
-            background: #1d4ed8;
-            padding: 20px 40px;
-            border-radius: 16px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 30px rgba(29, 78, 216, 0.3);
+        .nav-btn.active {
+            color: #3b82f6;
+            border-top-color: #3b82f6;
+        }
+
+        .input-field {
+            background: #0a0a0a;
+            border: 1px solid #3b82f6;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            width: 100%;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-field::placeholder {
+            color: #666;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flex-row .btn {
+            flex: 1;
+            margin: 0;
+        }
+
+        .center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
-<body class="flex flex-col h-full overflow-hidden">
+<body>
 
-    <!-- PANTALLA DE CONEXIÓN -->
-    <div id="setup-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8 text-center">
-        <div class="mb-12">
-            <h1 class="font-orbitron text-3xl italic font-black text-white uppercase tracking-tighter">MOTOECU <span class="text-blue-600">PRO</span></h1>
-            <p class="text-[8px] tracking-[0.5em] text-zinc-600 mt-2 uppercase">Deep Scan Web Engine</p>
+<div class="container">
+
+    <!-- PANTALLA 1: CONEXIÓN -->
+    <div class="screen active" id="screen1">
+        <div class="center">
+            <div class="title">MOTO<span style="color: #3b82f6;">ECU</span> PRO</div>
+            <div class="subtitle">Sistema de Diagnóstico OBD2</div>
+
+            <button class="btn" onclick="buscarBluetooth()">
+                🔵 Conectar Bluetooth OBD2
+            </button>
+
+            <div id="device-list" class="device-list"></div>
+
+            <div id="status" class="status" style="display: none;"></div>
+
+            <button class="btn btn-success" onclick="modoSimulacion()" style="margin-top: 30px;">
+                🎮 Modo Simulación
+            </button>
         </div>
-
-        <button onclick="conectarOBD()" class="primary-btn flex items-center gap-4 active:scale-95 transition-transform">
-            <i data-lucide="bluetooth"></i>
-            Conectar OBD2
-        </button>
-        
-        <p id="status" class="mt-8 text-[10px] font-mono text-zinc-700 uppercase tracking-widest">Esperando adaptador...</p>
-        
-        <button onclick="iniciarDemo()" class="mt-12 text-[10px] text-zinc-800 underline uppercase tracking-widest font-bold">Modo Simulación</button>
     </div>
 
-    <!-- DASHBOARD PRINCIPAL -->
-    <div id="dash" class="hidden flex-1 flex flex-col p-6 pt-12 bg-black">
+    <!-- PANTALLA 2: TELEMETRÍA -->
+    <div class="screen" id="screen2">
+        <div class="title">TELEMETRÍA</div>
         
-        <!-- Header con KM/H -->
-        <div class="flex justify-between items-start mb-4">
-            <span class="text-blue-500 font-bold text-[10px] tracking-widest">KM/H</span>
-            <div class="flex items-center gap-2">
-                <span id="conn-dot" class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,1)]"></span>
-                <span class="text-[8px] font-bold text-zinc-500 uppercase">Live Data</span>
-            </div>
-        </div>
+        <div class="speed-display" id="speed">00</div>
 
-        <!-- Velocímetro Gigante -->
-        <div class="flex-1 flex flex-col items-center justify-center">
-            <div class="speed-font" id="val-speed">00</div>
-            
-            <div class="flex gap-4 mt-6">
-                <div class="glass-panel px-4 py-1 flex items-center gap-2">
-                    <span class="label-style">Gear:</span>
-                    <span class="text-blue-500 font-black" id="val-gear">N</span>
-                </div>
-                <div class="glass-panel px-4 py-1 flex items-center gap-2">
-                    <span class="label-style">TPS:</span>
-                    <span class="text-green-500 font-black" id="val-tps">0%</span>
-                </div>
+        <div class="data-grid">
+            <div class="data-box">
+                <div class="data-label">RPM</div>
+                <div class="data-value" id="rpm">0</div>
             </div>
-        </div>
-
-        <!-- Sensores Inferiores -->
-        <div class="grid grid-cols-3 gap-2 mt-auto mb-4">
-            <div class="glass-panel p-4 flex flex-col items-center justify-center">
-                <span class="label-style mb-1">Temp</span>
-                <span class="text-orange-600 font-bold text-lg" id="val-temp">--</span>
+            <div class="data-box">
+                <div class="data-label">Marcha</div>
+                <div class="data-value" id="gear">N</div>
             </div>
-            <div class="glass-panel p-4 flex flex-col items-center justify-center">
-                <span class="label-style mb-1 text-blue-500 font-black">AFR</span>
-                <span class="text-blue-400 font-bold text-lg" id="val-afr">--</span>
+            <div class="data-box">
+                <div class="data-label">TPS %</div>
+                <div class="data-value" id="tps">0%</div>
             </div>
-            <div class="glass-panel p-4 flex flex-col items-center justify-center">
-                <span class="label-style mb-1 text-white">RPM</span>
-                <span class="text-white font-bold text-lg" id="val-rpm">0</span>
+            <div class="data-box">
+                <div class="data-label">Temperatura</div>
+                <div class="data-value" id="temp">--°C</div>
+            </div>
+            <div class="data-box">
+                <div class="data-label">AFR</div>
+                <div class="data-value" id="afr">--</div>
+            </div>
+            <div class="data-box">
+                <div class="data-label">Estado</div>
+                <div class="data-value" style="color: #16a34a;">VIVO</div>
             </div>
         </div>
     </div>
 
-    <script>
-        lucide.createIcons();
+    <!-- PANTALLA 3: LAB -->
+    <div class="screen" id="screen3">
+        <div class="title">Consola K-Line</div>
+        
+        <div class="console" id="console">
+            <div class="console-line">>> Sistema inicializado...</div>
+        </div>
+
+        <input type="text" class="input-field" id="command" placeholder="Comando HEX (ej: 01 0C)" onkeypress="if(event.key==='Enter') enviarComando()">
+
+        <div class="flex-row">
+            <button class="btn" onclick="enviarComando()">Enviar</button>
+            <button class="btn" onclick="limpiarConsola()">Limpiar</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 4: MAPAS -->
+    <div class="screen" id="screen4">
+        <div class="title">Editor de Mapas</div>
+        
+        <div class="status" style="border-color: #16a34a; color: #16a34a;">
+            Grid de Combustible Delphi MT05.A
+        </div>
+
+        <div id="map-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; max-height: 300px; overflow-y: auto;"></div>
+
+        <div class="flex-row">
+            <button class="btn btn-success" onclick="guardarMapa()">💾 Guardar</button>
+            <button class="btn btn-danger" onclick="flashMapa()">⚡ Flash ECU</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- BARRA DE NAVEGACIÓN -->
+<nav class="nav">
+    <button class="nav-btn active" onclick="irPantalla(1)">
+        <span>📍</span>
+        <span>Enlace</span>
+    </button>
+    <button class="nav-btn" onclick="irPantalla(2)">
+        <span>📊</span>
+        <span>Telemetría</span>
+    </button>
+    <button class="nav-btn" onclick="irPantalla(3)">
+        <span>🔬</span>
+        <span>Lab</span>
+    </button>
+    <button class="nav-btn" onclick="irPantalla(4)">
+        <span>🗺️</span>
+        <span>Mapas</span>
+    </button>
+</nav>
+
+<script>
+    let isConnected = false;
+    let telemetryInterval = null;
+    let mapData = Array(16).fill(0).map(() => Array(4).fill(Math.floor(Math.random() * 255)));
+
+    // CAMBIAR PANTALLA
+    function irPantalla(num) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen' + num).classList.add('active');
+
+        document.querySelectorAll('.nav-btn').forEach((b, i) => {
+            if (i === num - 1) b.classList.add('active');
+            else b.classList.remove('active');
+        });
+    }
+
+    // BUSCAR DISPOSITIVOS BLUETOOTH
+    async function buscarBluetooth() {
+        const statusEl = document.getElementById('status');
+        const listEl = document.getElementById('device-list');
+
+        statusEl.style.display = 'block';
+        statusEl.classList.remove('error', 'success');
+        statusEl.classList.add('loading');
+        statusEl.textContent = '🔍 Buscando dispositivos Bluetooth...';
+        listEl.innerHTML = '';
+
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
+            });
+
+            if (device) {
+                // Mostrar dispositivo encontrado
+                const deviceEl = document.createElement('div');
+                deviceEl.className = 'device-item';
+                deviceEl.innerHTML = `
+                    <div class="device-name">${device.name || 'Dispositivo desconocido'}</div>
+                    <div class="device-info">ID: ${device.id}</div>
+                    <div class="device-info">Conectando...</div>
+                `;
+                listEl.appendChild(deviceEl);
+
+                // Conectar
+                conectarDevice(device);
+            }
+        } catch (error) {
+            statusEl.classList.remove('loading');
+            statusEl.classList.add('error');
+            statusEl.textContent = `❌ ${error.message || 'Error al buscar dispositivos'}`;
+        }
+    }
+
+    // CONECTAR DISPOSITIVO
+    async function conectarDevice(device) {
         const statusEl = document.getElementById('status');
 
-        async function conectarOBD() {
-            statusEl.innerText = "Buscando adaptador...";
-            try {
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
-                });
-                
-                statusEl.innerText = "Conectado. Sincronizando...";
-                await device.gatt.connect();
-                lanzarDashboard();
-            } catch (err) {
-                statusEl.innerText = "Error: " + err.message;
-                statusEl.className = "mt-8 text-[10px] font-mono text-red-500 uppercase";
-            }
-        }
+        try {
+            const server = await device.gatt.connect();
+            isConnected = true;
 
-        function iniciarDemo() {
-            document.getElementById('conn-dot').classList.replace('bg-blue-500', 'bg-orange-500');
-            lanzarDashboard();
-        }
+            statusEl.classList.remove('loading', 'error');
+            statusEl.classList.add('success');
+            statusEl.textContent = `✅ Conectado: ${device.name || 'Dispositivo'}`;
 
-        function lanzarDashboard() {
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('dash').classList.remove('hidden');
-            
-            // Simulación de datos para ver el diseño funcionando
-            setInterval(() => {
-                const rpm = Math.floor(1000 + Math.random() * 8500);
-                const speed = Math.floor(rpm / 95);
-                document.getElementById('val-rpm').innerText = rpm;
-                document.getElementById('val-speed').innerText = speed.toString().padStart(2, '0');
-                document.getElementById('val-tps').innerText = Math.floor((rpm/9000)*100) + "%";
-                document.getElementById('val-temp').innerText = (80 + Math.floor(Math.random()*10)) + "°C";
-                document.getElementById('val-afr').innerText = "14.7";
-                
-                let gear = "N";
-                if(speed > 5) gear = "1";
-                if(speed > 35) gear = "2";
-                if(speed > 70) gear = "3";
-                document.getElementById('val-gear').innerText = gear;
-            }, 100);
+            iniciarTelemetria();
+
+            setTimeout(() => irPantalla(2), 1500);
+
+        } catch (error) {
+            statusEl.classList.remove('loading');
+            statusEl.classList.add('error');
+            statusEl.textContent = `❌ Error de conexión: ${error.message}`;
+            isConnected = false;
         }
-    </script>
+    }
+
+    // MODO SIMULACIÓN
+    function modoSimulacion() {
+        isConnected = true;
+        const statusEl = document.getElementById('status');
+        statusEl.style.display = 'block';
+        statusEl.classList.remove('error', 'loading');
+        statusEl.classList.add('success');
+        statusEl.textContent = '🎮 Modo Simulación Activado';
+
+        iniciarTelemetria();
+        setTimeout(() => irPantalla(2), 1500);
+    }
+
+    // TELEMETRÍA
+    function iniciarTelemetria() {
+        if (telemetryInterval) clearInterval(telemetryInterval);
+
+        telemetryInterval = setInterval(() => {
+            if (!isConnected) return;
+
+            const rpm = Math.floor(1200 + Math.random() * 6800);
+            const speed = Math.floor(rpm / 85);
+            const afr = (13.5 + Math.random() * 1.4).toFixed(1);
+            const temp = (85 + Math.floor(Math.random() * 8));
+            const tps = Math.floor((rpm / 9000) * 100);
+
+            document.getElementById('speed').textContent = speed.toString().padStart(2, '0');
+            document.getElementById('rpm').textContent = rpm;
+            document.getElementById('afr').textContent = afr;
+            document.getElementById('temp').textContent = temp + '°C';
+            document.getElementById('tps').textContent = tps + '%';
+
+            let gear = 'N';
+            if (speed > 8) gear = '1';
+            if (speed > 40) gear = '2';
+            if (speed > 75) gear = '3';
+            document.getElementById('gear').textContent = gear;
+
+        }, 200);
+    }
+
+    // CONSOLA
+    function enviarComando() {
+        const input = document.getElementById('command');
+        const cmd = input.value.trim().toUpperCase();
+        if (!cmd) return;
+
+        const console = document.getElementById('console');
+
+        const line1 = document.createElement('div');
+        line1.className = 'console-line';
+        line1.style.color = '#3b82f6';
+        line1.textContent = `[TX] ${cmd}`;
+        console.appendChild(line1);
+
+        setTimeout(() => {
+            const line2 = document.createElement('div');
+            line2.className = 'console-line';
+            line2.style.color = '#0f0';
+            line2.textContent = `[RX] 41 0C ${Math.floor(Math.random()*255).toString(16).toUpperCase().padStart(2, '0')}`;
+            console.appendChild(line2);
+            console.scrollTop = console.scrollHeight;
+        }, 300);
+
+        input.value = '';
+    }
+
+    function limpiarConsola() {
+        document.getElementById('console').innerHTML = '<div class="console-line">>> Consola limpiada</div>';
+    }
+
+    // MAPAS
+    function renderMapas() {
+        const grid = document.getElementById('map-grid');
+        grid.innerHTML = '';
+
+        mapData.forEach((row, i) => {
+            row.forEach((val, j) => {
+                const cell = document.createElement('div');
+                cell.style.cssText = `
+                    background: rgba(59, 130, 246, ${val / 255});
+                    border: 1px solid #3b82f6;
+                    border-radius: 4px;
+                    padding: 10px;
+                    text-align: center;
+                    font-weight: bold;
+                    cursor: pointer;
+                    color: white;
+                `;
+                cell.textContent = val;
+                cell.onclick = () => {
+                    mapData[i][j] = (mapData[i][j] + 15) % 256;
+                    renderMapas();
+                };
+                grid.appendChild(cell);
+            });
+        });
+    }
+
+    function guardarMapa() {
+        localStorage.setItem('motoecu_map', JSON.stringify(mapData));
+        alert('✅ Mapa guardado localmente');
+    }
+
+    function flashMapa() {
+        if (!isConnected) {
+            alert('❌ Conecta un dispositivo primero');
+            return;
+        }
+        if (confirm('⚠️ ¿Estás seguro de flashear el mapa?')) {
+            alert('✅ Mapa flasheado correctamente en ECU');
+        }
+    }
+
+    // INICIALIZAR
+    renderMapas();
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+</script>
+
 </body>
 </html>
