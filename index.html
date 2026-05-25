@@ -6,468 +6,276 @@
     <title>MotoECU Pro</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { 
-            width: 100%; 
-            height: 100vh; 
-            background: #000; 
-            color: #fff; 
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
-        .main {
-            width: 100%;
-            height: calc(100% - 90px);
-            overflow-y: auto;
-            padding: 15px;
-        }
-        .screen {
-            display: none;
-            animation: fadeIn 0.3s;
-        }
-        .screen.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .title {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #3b82f6;
-            text-align: center;
-        }
-        .btn {
-            width: 100%;
-            padding: 15px;
-            margin: 8px 0;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .btn:active { transform: scale(0.98); }
+        html, body { width: 100%; height: 100vh; background: #000; color: #fff; font-family: Arial; overflow: hidden; }
+        .container { width: 100%; height: calc(100% - 100px); overflow-y: auto; padding: 15px; }
+        .screen { display: none; animation: fadeIn 0.3s; }
+        .screen.show { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .title { font-size: 28px; margin: 15px 0; color: #3b82f6; text-align: center; font-weight: bold; }
+        .subtitle { font-size: 12px; color: #888; text-align: center; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 15px; margin: 10px 0; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+        .btn:active { background: #2563eb; transform: scale(0.98); }
         .btn-green { background: #16a34a; }
+        .btn-green:active { background: #15803d; }
         .btn-red { background: #dc2626; }
-        .device {
-            background: #0a0a0a;
-            border: 2px solid #3b82f6;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .device:active { background: #1a1a1a; }
+        .btn-red:active { background: #b91c1c; }
+        .device-box { background: #0a0a0a; border: 2px solid #3b82f6; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; }
+        .device-box:active { background: #1a1a1a; }
         .device-name { font-size: 16px; font-weight: bold; color: #3b82f6; }
         .device-id { font-size: 12px; color: #888; margin-top: 5px; }
-        .status {
-            background: #0a0a0a;
-            border: 1px solid #3b82f6;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 13px;
-        }
-        .status.success { border-color: #16a34a; color: #16a34a; }
-        .status.error { border-color: #dc2626; color: #dc2626; }
-        .status.loading { border-color: #3b82f6; color: #3b82f6; }
-        .speed {
-            font-size: 90px;
-            font-weight: bold;
-            text-align: center;
-            color: #3b82f6;
-            margin: 30px 0;
-            font-family: monospace;
-        }
-        .data-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .data-box {
-            background: #0a0a0a;
-            border: 1px solid #3b82f6;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .data-label { font-size: 11px; color: #888; text-transform: uppercase; }
-        .data-value { font-size: 20px; font-weight: bold; color: #3b82f6; margin-top: 8px; }
-        .console {
-            background: #050505;
-            border: 1px solid #0f0;
-            color: #0f0;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            height: 180px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 11px;
-        }
-        .console-line { margin: 3px 0; }
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #0a0a0a;
-            border: 1px solid #3b82f6;
-            color: white;
-            border-radius: 8px;
-            margin: 8px 0;
-            font-family: monospace;
-        }
+        .status { background: #0a0a0a; border: 1px solid #3b82f6; padding: 12px; margin: 10px 0; border-radius: 8px; text-align: center; font-size: 13px; }
+        .status.ok { border-color: #16a34a; color: #16a34a; }
+        .status.err { border-color: #dc2626; color: #dc2626; }
+        .status.load { border-color: #3b82f6; color: #3b82f6; }
+        .speed { font-size: 90px; text-align: center; color: #3b82f6; margin: 20px 0; font-weight: bold; font-family: monospace; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .box { background: #0a0a0a; border: 1px solid #3b82f6; padding: 12px; border-radius: 8px; text-align: center; }
+        .label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .value { font-size: 18px; font-weight: bold; color: #3b82f6; }
+        .console { background: #050505; border: 1px solid #0f0; color: #0f0; padding: 10px; margin: 10px 0; height: 150px; overflow-y: auto; border-radius: 8px; font-family: monospace; font-size: 11px; }
+        .console-line { margin: 2px 0; }
+        input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #3b82f6; color: white; border-radius: 8px; margin: 10px 0; font-family: monospace; }
         input::placeholder { color: #666; }
-        .map-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 20px 0;
-        }
-        .map-cell {
-            aspect-ratio: 1;
-            border: 1px solid #3b82f6;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        /* BARRA DE NAVEGACIÓN */
-        .navbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 90px;
-            background: #000;
-            border-top: 3px solid #3b82f6;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-        }
-        .nav-btn {
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 10px;
-            flex: 1;
-            height: 100%;
-            text-transform: uppercase;
-            transition: all 0.2s;
-        }
-        .nav-btn.active {
-            color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .nav-icon { font-size: 24px; }
-        .nav-label { font-size: 11px; letter-spacing: 0.05em; }
-
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row .btn { flex: 1; margin: 0; }
+        .map-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; }
+        .map-cell { aspect-ratio: 1; background: #0a0a0a; border: 1px solid #3b82f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .map-cell:active { background: #1a1a1a; }
+        .navbar { position: fixed; bottom: 0; width: 100%; height: 100px; background: #000; border-top: 2px solid #3b82f6; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex: 1; height: 100%; padding: 10px; text-transform: uppercase; }
+        .nav-btn.active { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .icon { font-size: 28px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .two-col .btn { margin: 0; }
     </style>
 </head>
 <body>
 
-<div class="main">
+<div class="container">
     <!-- PANTALLA 1: CONEXIÓN -->
-    <div class="screen active" id="screen1">
+    <div class="screen show" id="s1">
         <div class="title">🔌 MOTOECU PRO</div>
-        <p style="text-align: center; color: #888; margin-bottom: 20px;">Diagnóstico OBD2 Bluetooth</p>
+        <div class="subtitle">Diagnóstico OBD2 Bluetooth y USB</div>
         
-        <button class="btn" onclick="buscarDispositivosBT()">
-            🔵 BUSCAR DISPOSITIVOS BLUETOOTH
-        </button>
+        <button class="btn" onclick="buscarBT()">🔵 BUSCAR BLUETOOTH</button>
+        <button class="btn" onclick="buscarUSB()" style="background: #16a34a;">🔌 BUSCAR USB</button>
         
-        <div id="device-list"></div>
+        <div id="lista-dispositivos"></div>
+        <div id="estado" class="status" style="display: none;"></div>
         
-        <div id="status" class="status" style="display: none;"></div>
-        
-        <button class="btn btn-green" onclick="modoSimulacion()" style="margin-top: 20px;">
-            🎮 MODO SIMULACIÓN (SIN ADAPTADOR)
-        </button>
+        <button class="btn btn-green" onclick="sim()" style="margin-top: 30px;">🎮 SIMULACIÓN</button>
     </div>
 
     <!-- PANTALLA 2: TELEMETRÍA -->
-    <div class="screen" id="screen2">
+    <div class="screen" id="s2">
         <div class="title">📊 TELEMETRÍA</div>
-        <div class="speed" id="speed-val">00</div>
-        
-        <div class="data-grid">
-            <div class="data-box">
-                <div class="data-label">RPM</div>
-                <div class="data-value" id="rpm-val">0</div>
-            </div>
-            <div class="data-box">
-                <div class="data-label">Marcha</div>
-                <div class="data-value" id="gear-val">N</div>
-            </div>
-            <div class="data-box">
-                <div class="data-label">TPS %</div>
-                <div class="data-value" id="tps-val">0%</div>
-            </div>
-            <div class="data-box">
-                <div class="data-label">Temperatura</div>
-                <div class="data-value" id="temp-val">--°C</div>
-            </div>
-            <div class="data-box">
-                <div class="data-label">AFR</div>
-                <div class="data-value" id="afr-val">--</div>
-            </div>
-            <div class="data-box">
-                <div class="data-label">Estado</div>
-                <div class="data-value" style="color: #22c55e;">VIVO</div>
-            </div>
+        <div class="speed" id="vel">00</div>
+        <div class="grid">
+            <div class="box"><div class="label">RPM</div><div class="value" id="rpm">0</div></div>
+            <div class="box"><div class="label">MARCHA</div><div class="value" id="marcha">N</div></div>
+            <div class="box"><div class="label">TPS</div><div class="value" id="tps">0%</div></div>
+            <div class="box"><div class="label">TEMP</div><div class="value" id="temp">--°C</div></div>
+            <div class="box"><div class="label">AFR</div><div class="value" id="afr">--</div></div>
+            <div class="box"><div class="label">ESTADO</div><div class="value" style="color: #22c55e;">VIVO</div></div>
         </div>
     </div>
 
     <!-- PANTALLA 3: LAB -->
-    <div class="screen" id="screen3">
+    <div class="screen" id="s3">
         <div class="title">🔬 CONSOLA K-LINE</div>
-        
-        <div class="console" id="console">
-            <div class="console-line">>> Sistema inicializado</div>
-        </div>
-        
-        <input type="text" id="cmd-input" placeholder="Comando HEX (ej: 01 0C)" 
-               onkeypress="if(event.key==='Enter') enviarComando()">
-        
-        <div class="flex-row">
-            <button class="btn" onclick="enviarComando()">Enviar</button>
-            <button class="btn btn-red" onclick="limpiarConsola()">Limpiar</button>
+        <div class="console" id="consola">>>> Listo</div>
+        <input type="text" id="cmd" placeholder="Comando HEX (ej: 01 0C)" onkeypress="if(event.key==='Enter') env()">
+        <div class="two-col">
+            <button class="btn" onclick="env()">ENVIAR</button>
+            <button class="btn btn-red" onclick="limpC()">LIMPIAR</button>
         </div>
     </div>
 
     <!-- PANTALLA 4: MAPAS -->
-    <div class="screen" id="screen4">
-        <div class="title">🗺️ EDITOR DE MAPAS</div>
-        <p style="text-align: center; color: #888; margin-bottom: 15px;">Grid de Combustible Delphi MT05.A</p>
-        
-        <div class="map-grid" id="map-grid"></div>
-        
-        <div class="flex-row">
-            <button class="btn btn-green" onclick="guardarMapa()">💾 Guardar</button>
-            <button class="btn btn-red" onclick="flashMapa()">⚡ Flash ECU</button>
+    <div class="screen" id="s4">
+        <div class="title">🗺️ EDITOR MAPAS</div>
+        <div class="subtitle">Grid Delphi MT05.A</div>
+        <div class="map-grid" id="mapas"></div>
+        <div class="two-col">
+            <button class="btn btn-green" onclick="guardar()">💾 GUARDAR</button>
+            <button class="btn btn-red" onclick="flash()">⚡ FLASH</button>
         </div>
     </div>
 </div>
 
-<!-- BARRA DE NAVEGACIÓN -->
+<!-- NAVEGACIÓN -->
 <nav class="navbar">
-    <button class="nav-btn active" onclick="cambiarPantalla(1, this)">
-        <div class="nav-icon">📍</div>
-        <div class="nav-label">Enlace</div>
-    </button>
-    <button class="nav-btn" onclick="cambiarPantalla(2, this)">
-        <div class="nav-icon">📊</div>
-        <div class="nav-label">Telemetría</div>
-    </button>
-    <button class="nav-btn" onclick="cambiarPantalla(3, this)">
-        <div class="nav-icon">🔬</div>
-        <div class="nav-label">Lab</div>
-    </button>
-    <button class="nav-btn" onclick="cambiarPantalla(4, this)">
-        <div class="nav-icon">🗺️</div>
-        <div class="nav-label">Mapas</div>
-    </button>
+    <button class="nav-btn active" onclick="go(1)"><div class="icon">📍</div><div>ENLACE</div></button>
+    <button class="nav-btn" onclick="go(2)"><div class="icon">📊</div><div>TELEM</div></button>
+    <button class="nav-btn" onclick="go(3)"><div class="icon">🔬</div><div>LAB</div></button>
+    <button class="nav-btn" onclick="go(4)"><div class="icon">🗺️</div><div>MAPAS</div></button>
 </nav>
 
 <script>
-let isConnected = false;
-let telemetryInterval = null;
-let mapData = Array(16).fill(0).map(() => Math.floor(Math.random() * 255));
+let con = false;
+let tel = null;
+let map = Array(16).fill(0).map(() => Math.floor(Math.random() * 255));
 
-// CAMBIAR PANTALLA
-function cambiarPantalla(num, btn) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+function go(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('show'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    
-    document.getElementById('screen' + num).classList.add('active');
-    btn.classList.add('active');
+    document.getElementById('s' + n).classList.add('show');
+    document.querySelectorAll('.nav-btn')[n-1].classList.add('active');
 }
 
-// BUSCAR DISPOSITIVOS BLUETOOTH
-async function buscarDispositivosBT() {
-    const statusEl = document.getElementById('status');
-    const listEl = document.getElementById('device-list');
-    
-    statusEl.style.display = 'block';
-    statusEl.className = 'status loading';
-    statusEl.textContent = '🔍 Buscando dispositivos...';
-    listEl.innerHTML = '';
+// BLUETOOTH
+async function buscarBT() {
+    const st = document.getElementById('estado');
+    const lista = document.getElementById('lista-dispositivos');
+    st.style.display = 'block';
+    st.className = 'status load';
+    st.textContent = '🔍 Escaneando Bluetooth...';
+    lista.innerHTML = '';
     
     try {
-        const device = await navigator.bluetooth.requestDevice({
+        const dev = await navigator.bluetooth.requestDevice({
             acceptAllDevices: true,
             optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
         });
         
-        if (device) {
-            const deviceEl = document.createElement('div');
-            deviceEl.className = 'device';
-            deviceEl.innerHTML = `
-                <div class="device-name">✅ ${device.name || 'Dispositivo Desconocido'}</div>
-                <div class="device-id">ID: ${device.id}</div>
-                <div class="device-id">Tocá para conectar...</div>
-            `;
-            deviceEl.onclick = () => conectarDevice(device);
-            listEl.appendChild(deviceEl);
-            
-            statusEl.className = 'status success';
-            statusEl.textContent = '✅ Dispositivo encontrado. Tocá para conectar.';
+        if (dev) {
+            const box = document.createElement('div');
+            box.className = 'device-box';
+            box.innerHTML = `<div class="device-name">✅ ${dev.name || 'OBD2'}</div><div class="device-id">ID: ${dev.id}</div>`;
+            box.onclick = () => conBT(dev);
+            lista.appendChild(box);
+            st.className = 'status load';
+            st.textContent = '📱 Encontrado. Tocá para conectar.';
         }
-    } catch (error) {
-        statusEl.className = 'status error';
-        statusEl.textContent = '❌ ' + (error.message || 'No se encontraron dispositivos');
+    } catch (e) {
+        st.className = 'status err';
+        st.textContent = '❌ ' + e.message;
     }
 }
 
-// CONECTAR DISPOSITIVO
-async function conectarDevice(device) {
-    const statusEl = document.getElementById('status');
+async function conBT(dev) {
+    const st = document.getElementById('estado');
+    try {
+        st.textContent = '⏳ Conectando...';
+        await dev.gatt.connect();
+        con = true;
+        st.className = 'status ok';
+        st.textContent = '✅ Conectado: ' + (dev.name || 'OBD2');
+        tel_init();
+        setTimeout(() => go(2), 1000);
+    } catch (e) {
+        st.className = 'status err';
+        st.textContent = '❌ Error: ' + e.message;
+    }
+}
+
+// USB
+async function buscarUSB() {
+    const st = document.getElementById('estado');
+    st.style.display = 'block';
+    if (!('serial' in navigator)) {
+        st.className = 'status err';
+        st.textContent = '❌ USB Serial no soportado en este navegador';
+        return;
+    }
+    
+    st.className = 'status load';
+    st.textContent = '🔌 Buscando puerto USB...';
     
     try {
-        statusEl.className = 'status loading';
-        statusEl.textContent = '⏳ Conectando...';
-        
-        const server = await device.gatt.connect();
-        isConnected = true;
-        
-        statusEl.className = 'status success';
-        statusEl.textContent = '✅ Conectado: ' + (device.name || 'Dispositivo');
-        
-        iniciarTelemetria();
-        setTimeout(() => cambiarPantalla(2, document.querySelectorAll('.nav-btn')[1]), 1500);
-        
-    } catch (error) {
-        statusEl.className = 'status error';
-        statusEl.textContent = '❌ Error de conexión: ' + error.message;
-        isConnected = false;
+        const port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 10400 });
+        con = true;
+        st.className = 'status ok';
+        st.textContent = '✅ Conectado por USB';
+        tel_init();
+        setTimeout(() => go(2), 1000);
+    } catch (e) {
+        st.className = 'status err';
+        st.textContent = '❌ Error USB: ' + e.message;
     }
 }
 
-// MODO SIMULACIÓN
-function modoSimulacion() {
-    isConnected = true;
-    const statusEl = document.getElementById('status');
-    statusEl.style.display = 'block';
-    statusEl.className = 'status success';
-    statusEl.textContent = '🎮 MODO SIMULACIÓN ACTIVADO';
-    
-    iniciarTelemetria();
-    setTimeout(() => cambiarPantalla(2, document.querySelectorAll('.nav-btn')[1]), 1500);
+// SIMULACIÓN
+function sim() {
+    con = true;
+    document.getElementById('estado').style.display = 'block';
+    document.getElementById('estado').className = 'status ok';
+    document.getElementById('estado').textContent = '🎮 SIMULACIÓN ACTIVADA';
+    tel_init();
+    setTimeout(() => go(2), 1000);
 }
 
 // TELEMETRÍA
-function iniciarTelemetria() {
-    if (telemetryInterval) clearInterval(telemetryInterval);
-    
-    telemetryInterval = setInterval(() => {
-        if (!isConnected) return;
-        
+function tel_init() {
+    if (tel) clearInterval(tel);
+    tel = setInterval(() => {
+        if (!con) return;
         const rpm = Math.floor(1200 + Math.random() * 6800);
-        const speed = Math.floor(rpm / 85);
-        const afr = (13.5 + Math.random() * 1.4).toFixed(1);
-        const temp = (85 + Math.floor(Math.random() * 8));
-        const tps = Math.floor((rpm / 9000) * 100);
-        
-        document.getElementById('speed-val').textContent = speed.toString().padStart(2, '0');
-        document.getElementById('rpm-val').textContent = rpm;
-        document.getElementById('afr-val').textContent = afr;
-        document.getElementById('temp-val').textContent = temp + '°C';
-        document.getElementById('tps-val').textContent = tps + '%';
-        
-        let gear = 'N';
-        if (speed > 8) gear = '1';
-        if (speed > 40) gear = '2';
-        if (speed > 75) gear = '3';
-        document.getElementById('gear-val').textContent = gear;
-        
+        const vel = Math.floor(rpm / 85);
+        document.getElementById('vel').textContent = vel.toString().padStart(2, '0');
+        document.getElementById('rpm').textContent = rpm;
+        document.getElementById('temp').textContent = (85 + Math.floor(Math.random() * 8)) + '°C';
+        document.getElementById('afr').textContent = (13.5 + Math.random() * 1.4).toFixed(1);
+        document.getElementById('tps').textContent = Math.floor(rpm / 90) + '%';
+        let g = 'N';
+        if (vel > 8) g = '1';
+        if (vel > 40) g = '2';
+        if (vel > 75) g = '3';
+        document.getElementById('marcha').textContent = g;
     }, 200);
 }
 
 // CONSOLA
-function enviarComando() {
-    const input = document.getElementById('cmd-input');
-    const cmd = input.value.trim().toUpperCase();
+function env() {
+    const cmd = document.getElementById('cmd').value;
     if (!cmd) return;
-    
-    const console = document.getElementById('console');
-    
-    const line1 = document.createElement('div');
-    line1.className = 'console-line';
-    line1.style.color = '#3b82f6';
-    line1.textContent = '[TX] ' + cmd;
-    console.appendChild(line1);
-    
+    const c = document.getElementById('consola');
+    const l1 = document.createElement('div');
+    l1.className = 'console-line';
+    l1.style.color = '#3b82f6';
+    l1.textContent = '[TX] ' + cmd;
+    c.appendChild(l1);
     setTimeout(() => {
-        const line2 = document.createElement('div');
-        line2.className = 'console-line';
-        line2.style.color = '#0f0';
-        line2.textContent = '[RX] 41 0C ' + Math.floor(Math.random()*255).toString(16).toUpperCase().padStart(2, '0');
-        console.appendChild(line2);
-        console.scrollTop = console.scrollHeight;
+        const l2 = document.createElement('div');
+        l2.className = 'console-line';
+        l2.style.color = '#0f0';
+        l2.textContent = '[RX] 41 0C ' + Math.floor(Math.random()*255).toString(16).toUpperCase().padStart(2, '0');
+        c.appendChild(l2);
+        c.scrollTop = c.scrollHeight;
     }, 300);
-    
-    input.value = '';
+    document.getElementById('cmd').value = '';
 }
 
-function limpiarConsola() {
-    document.getElementById('console').innerHTML = '<div class="console-line">>> Consola limpiada</div>';
+function limpC() {
+    document.getElementById('consola').innerHTML = '>>> Limpiado';
 }
 
 // MAPAS
 function renderMapas() {
-    const grid = document.getElementById('map-grid');
-    grid.innerHTML = '';
-    
-    mapData.forEach((val, i) => {
-        const cell = document.createElement('div');
-        cell.className = 'map-cell';
-        cell.style.background = 'rgba(59, 130, 246, ' + (val / 255) + ')';
-        cell.textContent = val;
-        cell.onclick = () => {
-            mapData[i] = (mapData[i] + 15) % 256;
+    const m = document.getElementById('mapas');
+    m.innerHTML = '';
+    map.forEach((v, i) => {
+        const c = document.createElement('div');
+        c.className = 'map-cell';
+        c.style.background = 'rgba(59, 130, 246, ' + (v / 255) + ')';
+        c.textContent = v;
+        c.onclick = () => {
+            map[i] = (map[i] + 15) % 256;
             renderMapas();
         };
-        grid.appendChild(cell);
+        m.appendChild(c);
     });
 }
 
-function guardarMapa() {
-    localStorage.setItem('motoecu_map', JSON.stringify(mapData));
-    alert('✅ Mapa guardado localmente');
+function guardar() {
+    localStorage.setItem('motoecu', JSON.stringify(map));
+    alert('✅ Guardado');
 }
 
-function flashMapa() {
-    if (!isConnected) {
-        alert('❌ Conecta un dispositivo primero');
-        return;
-    }
-    if (confirm('⚠️ ¿Flashear mapa en ECU?')) {
-        alert('✅ Mapa flasheado correctamente');
-    }
+function flash() {
+    if (!con) { alert('❌ Conecta primero'); return; }
+    if (confirm('⚠️ ¿Flashear?')) alert('✅ Flasheado');
 }
 
-// INICIALIZAR
 renderMapas();
 </script>
 
